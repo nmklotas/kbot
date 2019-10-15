@@ -1,0 +1,5 @@
+ServerUrl: "https://mattermost.server.com"
+Channel: "bot channel name"
+Email: "bot email"
+Password: "bot password"
+Team: "bot team"
