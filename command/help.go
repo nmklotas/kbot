@@ -4,7 +4,7 @@ import (
 	"kbot/bot"
 	"strings"
 
-	. "gopkg.in/ahmetb/go-linq.v3"
+	. "github.com/ahmetb/go-linq/v3"
 )
 
 type HelpCommand struct {

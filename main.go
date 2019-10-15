@@ -9,7 +9,7 @@ import (
 	"os/signal"
 
 	"github.com/mattermost/mattermost-server/model"
-	. "gopkg.in/ahmetb/go-linq.v3"
+	. "github.com/ahmetb/go-linq/v3"
 )
 
 func main() {
