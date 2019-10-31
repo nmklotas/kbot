@@ -5,67 +5,85 @@ import (
 	"kbot/bot"
 	"kbot/command"
 	"kbot/config"
+	"kbot/fbposts"
 	"os"
 	"os/signal"
+    "time"
 
-	"github.com/mattermost/mattermost-server/model"
 	. "github.com/ahmetb/go-linq/v3"
+	"github.com/mattermost/mattermost-server/model"
 )
 
 func main() {
-    config, err := config.ReadConfig("config")
-    if err != nil {
-        panic("Failed to read config")
-    }
+    config := readConfig()
+    connection := createConnection(config)
+	apiClient := model.NewAPIv4Client(connection.ServerUrl)
+    matterMostBot := bot.NewMatterMostBot(apiClient, connection)
+    users := bot.NewUsers(apiClient)
+
+    ordersStore, err := command.NewOrdersStore()
+    panicOnError(err)
+    defer ordersStore.Close()
+
+	botChannel, err := matterMostBot.JoinChannel()
+	panicOnError(err)
+
+	posts, err := bot.NewPosts(apiClient, botChannel.Bot, botChannel.Channel)
+    panicOnError(err)
     
-	bot := bot.NewMatterMostBot(bot.Connection{
-		ServerUrl: config.ServerUrl,
-		Channel:   config.Channel,
-		Email:     config.Email,
-		Password:  config.Password,
-		Team:      config.Team,
-	})
-
-	posts, err := bot.JoinChannel()
-	if err != nil {
-		panic("Failed to join channel")
-	}
-
+    commands := createCommands(ordersStore, posts, users)
 	setupDisconnectOnOsInterrupt(posts)
 
-	posts.Subscribe(func(post *model.Post) {
-		if !command.IsBotCommand(post.Message) {
-			return
-		}
-
-		ordersStore, err := command.NewOrdersStore()
-		if err != nil {
-			panic("Can't create orders store")
+    posts.Subscribe(func(post *model.Post) {
+        if !command.IsBotCommand(post.Message) {
+            return
         }
-        
-        commands := []command.Command{
-            command.NewSaveOrderCommand(ordersStore, posts),
-            command.NewListOrdersCommand(ordersStore, posts),
-        }
-        commands = append(commands, command.NewHelpCommand(posts, commands))
+      
+        executeCommands(commands, post)
+    })
+    
+	fbposts.StartTicking(func(time time.Time) {
+	    fmt.Printf("Post check %s", time)
+    }, config.PostCheckIntervalMin)
 
-		executeCommands(commands, post)
-		defer ordersStore.Close()
-	})
+    select {}
+}
 
-	select {}
+func createCommands(ordersStore *command.OrdersStore, posts *bot.Posts, users *bot.Users) []command.Command {
+    commands := []command.Command{
+		command.NewSaveOrderCommand(ordersStore, posts, users),
+		command.NewListOrdersCommand(ordersStore, posts),
+    }
+    helpCommand := command.NewHelpCommand(posts, commands)
+    return append(commands, helpCommand)
+}
+
+func readConfig() config.Config {
+	config, err := config.ReadConfig("config")
+	panicOnError(err)
+	return config
+}
+
+func createConnection(c config.Config) bot.Connection {
+	return bot.Connection{
+		ServerUrl: c.ServerUrl,
+		Channel:   c.Channel,
+		Email:     c.Email,
+		Password:  c.Password,
+		Team:      c.Team,
+	}
 }
 
 func executeCommands(commands []command.Command, post *model.Post) {
-    From(commands).ForEachT(func(c command.Command) {
-        message := command.Message{Text: post.Message, UserId: post.UserId}
-        if c.CanHandle(message) {
-            commandErr := c.Handle(message)
-            if commandErr != nil {
-                fmt.Println(commandErr.Error())
-            }
-        }
-    })
+	From(commands).ForEachT(func(c command.Command) {
+		message := command.Message{Text: post.Message, UserId: post.UserId}
+		if c.CanHandle(message) {
+			err := c.Handle(message)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	})
 }
 
 func setupDisconnectOnOsInterrupt(posts *bot.Posts) {
@@ -73,8 +91,14 @@ func setupDisconnectOnOsInterrupt(posts *bot.Posts) {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for range c {
-			posts.Disconnect()
+			posts.Close()
 			os.Exit(0)
 		}
 	}()
+}
+
+func panicOnError(err error) {
+    if err != nil {
+        panic(err)
+    }
 }

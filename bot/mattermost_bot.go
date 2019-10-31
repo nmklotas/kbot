@@ -1,9 +1,6 @@
 package bot
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/mattermost/mattermost-server/model"
 )
 
@@ -20,11 +17,16 @@ type MatterMostBot struct {
 	connection Connection
 }
 
-func NewMatterMostBot(c Connection) *MatterMostBot {
-	return &MatterMostBot{model.NewAPIv4Client(c.ServerUrl), c}
+type BotChannel struct {
+    Bot *model.User
+	Channel *model.Channel
 }
 
-func (b MatterMostBot) JoinChannel() (*Posts, error) {
+func NewMatterMostBot(client *model.Client4, c Connection) *MatterMostBot {
+	return &MatterMostBot{client, c}
+}
+
+func (b MatterMostBot) JoinChannel() (*BotChannel, error) {
 	botUser, resp := b.client.Login(b.connection.Email, b.connection.Password)
 	if resp.Error != nil {
 		return nil, resp.Error
@@ -45,17 +47,8 @@ func (b MatterMostBot) JoinChannel() (*Posts, error) {
 		return nil, resp.Error
 	}
 
-	webSocketClient, err := model.NewWebSocketClient4(b.createWebSocketServerUrl(), b.client.AuthToken)
-	if err != nil {
-		return nil, err
-	}
-
-	webSocketClient.Listen()
-	return NewPosts(b.client, webSocketClient, botUser, botChannel), nil
-}
-
-func (b MatterMostBot) createWebSocketServerUrl() string {
-	address := strings.Replace(b.connection.ServerUrl, "https://", "", 1)
-	websocketAddress := fmt.Sprintf("wss://%s", address)
-	return websocketAddress
+	return &BotChannel{
+        Bot: botUser,
+        Channel: botChannel,
+    } , nil
 }

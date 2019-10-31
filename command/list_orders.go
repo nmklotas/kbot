@@ -44,7 +44,7 @@ func (c ListOrdersCommand) CreateAllOrdersMessage() (*string, error) {
 
 	From(orders).
 		SelectT(func(o Order) string {
-			return fmt.Sprintf("User: %s, Order: %s", o.UserId, o.Order)
+			return fmt.Sprintf("User: %s, Order: %s", o.UserName, o.Value)
 		}).
 		ToSlice(&orderDetails)
 

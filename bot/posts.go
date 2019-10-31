@@ -2,7 +2,7 @@ package bot
 
 import (
 	"strings"
-
+    "fmt"
 	"github.com/mattermost/mattermost-server/model"
 )
 
@@ -15,12 +15,19 @@ type Posts struct {
 	channel         *model.Channel
 }
 
-func NewPosts(client *model.Client4, webSocketClient *model.WebSocketClient, user *model.User, channel *model.Channel) *Posts {
+func NewPosts(client *model.Client4, user *model.User, channel *model.Channel) (*Posts, error) {
+	webSocketClient, err := model.NewWebSocketClient4(createWebSocketServerUrl(client), client.AuthToken)
+	if err != nil {
+		return nil, err
+	}
+
+	webSocketClient.Listen()
+
 	posts := Posts{client, webSocketClient, user, channel}
-	return &posts
+    return &posts, nil
 }
 
-func (p Posts) Disconnect() {
+func (p Posts) Close() {
 	p.webSocketClient.Close()
 }
 
@@ -38,15 +45,15 @@ func (p Posts) Create(message string, messageToReplyId string) error {
 	return nil
 }
 
-func (b Posts) Subscribe(callback PostCallback) {
+func (p Posts) Subscribe(callback PostCallback) {
 	go func() {
-		for event := range b.webSocketClient.EventChannel {
-			b.onMessage(event, callback)
+		for event := range p.webSocketClient.EventChannel {
+			p.onMessage(event, callback)
 		}
 	}()
 }
 
-func (b Posts) onMessage(event *model.WebSocketEvent, callback PostCallback) {
+func (p Posts) onMessage(event *model.WebSocketEvent, callback PostCallback) {
 	if event.Event != model.WEBSOCKET_EVENT_POSTED {
 		return
 	}
@@ -56,9 +63,15 @@ func (b Posts) onMessage(event *model.WebSocketEvent, callback PostCallback) {
 		return
 	}
 
-	if post.Id == b.user.Id {
+	if post.Id == p.user.Id {
 		return
 	}
 
 	callback(post)
+}
+
+func createWebSocketServerUrl(client *model.Client4) string {
+    address := strings.Replace(client.Url, "https://", "", 1)
+    websocketAddress := fmt.Sprintf("wss://%s", address)
+    return websocketAddress
 }

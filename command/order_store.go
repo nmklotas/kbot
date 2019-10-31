@@ -11,8 +11,9 @@ type OrdersStore struct {
 
 type Order struct {
 	gorm.Model
-	UserId string
-	Order  string
+    UserId string
+    UserName string
+	Value  string
 }
 
 func NewOrdersStore() (*OrdersStore, error) {
@@ -25,12 +26,12 @@ func NewOrdersStore() (*OrdersStore, error) {
 	return &OrdersStore{db}, nil
 }
 
-func (o OrdersStore) Add(userId string, order *string) error {
-	return o.db.Create(&Order{UserId: userId, Order: *order}).Error
+func (o OrdersStore) Add(order Order) error {
+	return o.db.Create(&order).Error
 }
 
-func (o OrdersStore) Remove(userId string, order *string) error {
-	return o.db.Where(&Order{UserId: userId, Order: *order}).Delete(Order{}).Error
+func (o OrdersStore) Remove(userId string, order string) error {
+	return o.db.Where(&Order{UserId: userId, Value: order}).Delete(Order{}).Error
 }
 
 func (o OrdersStore) List() ([]Order, error) {

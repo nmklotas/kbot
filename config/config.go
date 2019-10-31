@@ -7,7 +7,8 @@ type Config struct {
 	Channel   string
 	Email     string
 	Password  string
-	Team      string
+    Team      string
+    PostCheckIntervalMin int
 }
 
 func ReadConfig(configName string) (Config, error) {
@@ -24,6 +25,7 @@ func ReadConfig(configName string) (Config, error) {
 		Channel:   viper.GetString("Channel"),
 		Email:     viper.GetString("Email"),
 		Password:  viper.GetString("Password"),
-		Team:      viper.GetString("Team"),
+        Team:      viper.GetString("Team"),
+        PostCheckIntervalMin: viper.GetInt("PostCheckIntervalMin"),
 	}, nil
 }

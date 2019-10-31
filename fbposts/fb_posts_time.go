@@ -12,9 +12,9 @@ func IsTimeToCheck(currentTime Time, checkTime Time, interval CheckInterval) boo
 	return timeLeft >= interval.Min && timeLeft <= interval.Max
 }
 
-func StartTicking(callback func(Time), intervalMilliseconds int64) {
+func StartTicking(callback func(Time), intervalMin int) {
 	go func() {
-		for now := range Tick(Millisecond) {
+		for now := range Tick(Duration(intervalMin) * Minute) {
 			callback(now)
 		}
 	}()

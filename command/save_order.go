@@ -9,11 +9,12 @@ import (
 
 type SaveOrderCommand struct {
 	ordersStore *OrdersStore
-	posts       *bot.Posts
+    posts       *bot.Posts
+    users *bot.Users
 }
 
-func NewSaveOrderCommand(ordersStore *OrdersStore, posts *bot.Posts) *SaveOrderCommand {
-	return &SaveOrderCommand{ordersStore, posts}
+func NewSaveOrderCommand(ordersStore *OrdersStore, posts *bot.Posts, users *bot.Users) *SaveOrderCommand {
+	return &SaveOrderCommand{ordersStore, posts, users}
 }
 
 func (p SaveOrderCommand) CanHandle(message Message) bool {
@@ -38,14 +39,19 @@ func (p SaveOrderCommand) SaveOrder(message Message) error {
 
 	orderToRemove, err := ParseOrderToRemove(message.Text)
 	if err == nil {
-		return p.RemoveOrderFromStore(message.UserId, orderToRemove)
+		return p.RemoveOrderFromStore(message.UserId, *orderToRemove)
 	}
 
 	return errors.New("Order not saved")
 }
 
 func (p SaveOrderCommand) AddOrderToStore(userId string, order *string) error {
-	if err := p.ordersStore.Add(userId, order); err != nil {
+    newOrder, err := p.createOrder(userId, *order);
+    if err != nil {
+        return err
+    }
+    
+	if err := p.ordersStore.Add(newOrder); err != nil {
 		return err
 	}
 
@@ -53,11 +59,20 @@ func (p SaveOrderCommand) AddOrderToStore(userId string, order *string) error {
 	return p.posts.Create(message, "")
 }
 
-func (p SaveOrderCommand) RemoveOrderFromStore(userId string, order *string) error {
+func (p SaveOrderCommand) RemoveOrderFromStore(userId string, order string) error {
 	if err := p.ordersStore.Remove(userId, order); err != nil {
 		return err
 	}
 
-	message := fmt.Sprintf("Order %s removed", strings.ToUpper(*order))
+	message := fmt.Sprintf("Order %s removed", strings.ToUpper(order))
 	return p.posts.Create(message, "")
+}
+
+func (p SaveOrderCommand) createOrder(userId string, order string) (Order, error) {
+    userName, err := p.users.Name(userId); 
+    if err != nil {
+		return Order{}, err
+	}
+
+	return Order{UserId: userId, Value: order, UserName: *userName}, nil
 }

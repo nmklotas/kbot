@@ -4,3 +4,4 @@ Email: "bot email"
 Password: "bot password"
 Team: "bot team"
 FacebookAccessToken: "TOKEN"
+PostCheckIntervalMin: 60

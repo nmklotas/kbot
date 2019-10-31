@@ -6,10 +6,9 @@ func TestCanAdd(t *testing.T) {
 	db, err := NewOrdersStore()
 	if err != nil {
 		t.Errorf("store not created")
-	}
-
-	order := "A"
-	err = db.Add("1", &order)
+    }
+    
+	err = db.Add(Order{UserId: "1", Value: "A"})
 	if err != nil {
 		t.Errorf("order not added")
 	}
@@ -26,13 +25,12 @@ func TestCanRemove(t *testing.T) {
 		t.Errorf("store not created")
 	}
 
-	order := "A"
-	err = db.Add("1", &order)
+	err = db.Add(Order{UserId: "1", Value: "A"})
 	if err != nil {
 		t.Errorf("order not added")
 	}
 
-	err = db.Remove("1", &order)
+	err = db.Remove("1", "A")
 	if err != nil {
 		t.Errorf("order not removed")
 	}
