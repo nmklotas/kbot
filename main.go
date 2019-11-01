@@ -8,54 +8,54 @@ import (
 	"kbot/fbposts"
 	"os"
 	"os/signal"
-    "time"
+	"time"
 
 	. "github.com/ahmetb/go-linq/v3"
 	"github.com/mattermost/mattermost-server/model"
 )
 
 func main() {
-    config := readConfig()
-    connection := createConnection(config)
+	config := readConfig()
+	connection := createConnection(config)
 	apiClient := model.NewAPIv4Client(connection.ServerUrl)
-    matterMostBot := bot.NewMatterMostBot(apiClient, connection)
-    users := bot.NewUsers(apiClient)
+	matterMostBot := bot.NewMatterMostBot(apiClient, connection)
+	users := bot.NewUsers(apiClient)
 
-    ordersStore, err := command.NewOrdersStore()
-    panicOnError(err)
-    defer ordersStore.Close()
+	ordersStore, err := command.NewOrdersStore()
+	panicOnError(err)
+	defer ordersStore.Close()
 
 	botChannel, err := matterMostBot.JoinChannel()
 	panicOnError(err)
 
 	posts, err := bot.NewPosts(apiClient, botChannel.Bot, botChannel.Channel)
-    panicOnError(err)
-    
-    commands := createCommands(ordersStore, posts, users)
+	panicOnError(err)
+
+	commands := createCommands(ordersStore, posts, users)
 	setupDisconnectOnOsInterrupt(posts)
 
-    posts.Subscribe(func(post *model.Post) {
-        if !command.IsBotCommand(post.Message) {
-            return
-        }
-      
-        executeCommands(commands, post)
-    })
-    
-	fbposts.StartTicking(func(time time.Time) {
-	    fmt.Printf("Post check %s", time)
-    }, config.PostCheckIntervalMin)
+	posts.Subscribe(func(post *model.Post) {
+		if !command.IsBotCommand(post.Message) {
+			return
+		}
 
-    select {}
+		executeCommands(commands, post)
+	})
+
+	fbposts.StartTicking(func(time time.Time) {
+		fmt.Printf("Post check %s", time)
+	}, config.PostCheckIntervalMin)
+
+	select {}
 }
 
 func createCommands(ordersStore *command.OrdersStore, posts *bot.Posts, users *bot.Users) []command.Command {
-    commands := []command.Command{
+	commands := []command.Command{
 		command.NewSaveOrderCommand(ordersStore, posts, users),
 		command.NewListOrdersCommand(ordersStore, posts),
-    }
-    helpCommand := command.NewHelpCommand(posts, commands)
-    return append(commands, helpCommand)
+	}
+	helpCommand := command.NewHelpCommand(posts, commands)
+	return append(commands, helpCommand)
 }
 
 func readConfig() config.Config {
@@ -98,7 +98,7 @@ func setupDisconnectOnOsInterrupt(posts *bot.Posts) {
 }
 
 func panicOnError(err error) {
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 }

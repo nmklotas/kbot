@@ -6,8 +6,8 @@ func TestCanAdd(t *testing.T) {
 	db, err := NewOrdersStore()
 	if err != nil {
 		t.Errorf("store not created")
-    }
-    
+	}
+
 	err = db.Add(Order{UserId: "1", Value: "A"})
 	if err != nil {
 		t.Errorf("order not added")

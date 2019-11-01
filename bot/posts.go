@@ -1,9 +1,9 @@
 package bot
 
 import (
-	"strings"
-    "fmt"
+	"fmt"
 	"github.com/mattermost/mattermost-server/model"
+	"strings"
 )
 
 type PostCallback func(*model.Post)
@@ -24,7 +24,7 @@ func NewPosts(client *model.Client4, user *model.User, channel *model.Channel) (
 	webSocketClient.Listen()
 
 	posts := Posts{client, webSocketClient, user, channel}
-    return &posts, nil
+	return &posts, nil
 }
 
 func (p Posts) Close() {
@@ -71,7 +71,7 @@ func (p Posts) onMessage(event *model.WebSocketEvent, callback PostCallback) {
 }
 
 func createWebSocketServerUrl(client *model.Client4) string {
-    address := strings.Replace(client.Url, "https://", "", 1)
-    websocketAddress := fmt.Sprintf("wss://%s", address)
-    return websocketAddress
+	address := strings.Replace(client.Url, "https://", "", 1)
+	websocketAddress := fmt.Sprintf("wss://%s", address)
+	return websocketAddress
 }

@@ -3,12 +3,12 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	ServerUrl string
-	Channel   string
-	Email     string
-	Password  string
-    Team      string
-    PostCheckIntervalMin int
+	ServerUrl            string
+	Channel              string
+	Email                string
+	Password             string
+	Team                 string
+	PostCheckIntervalMin int
 }
 
 func ReadConfig(configName string) (Config, error) {
@@ -21,11 +21,11 @@ func ReadConfig(configName string) (Config, error) {
 	}
 
 	return Config{
-		ServerUrl: viper.GetString("ServerUrl"),
-		Channel:   viper.GetString("Channel"),
-		Email:     viper.GetString("Email"),
-		Password:  viper.GetString("Password"),
-        Team:      viper.GetString("Team"),
-        PostCheckIntervalMin: viper.GetInt("PostCheckIntervalMin"),
+		ServerUrl:            viper.GetString("ServerUrl"),
+		Channel:              viper.GetString("Channel"),
+		Email:                viper.GetString("Email"),
+		Password:             viper.GetString("Password"),
+		Team:                 viper.GetString("Team"),
+		PostCheckIntervalMin: viper.GetInt("PostCheckIntervalMin"),
 	}, nil
 }

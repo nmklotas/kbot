@@ -11,9 +11,9 @@ type OrdersStore struct {
 
 type Order struct {
 	gorm.Model
-    UserId string
-    UserName string
-	Value  string
+	UserId   string
+	UserName string
+	Value    string
 }
 
 func NewOrdersStore() (*OrdersStore, error) {

@@ -18,7 +18,7 @@ type MatterMostBot struct {
 }
 
 type BotChannel struct {
-    Bot *model.User
+	Bot     *model.User
 	Channel *model.Channel
 }
 
@@ -48,7 +48,7 @@ func (b MatterMostBot) JoinChannel() (*BotChannel, error) {
 	}
 
 	return &BotChannel{
-        Bot: botUser,
-        Channel: botChannel,
-    } , nil
+		Bot:     botUser,
+		Channel: botChannel,
+	}, nil
 }

@@ -9,8 +9,8 @@ import (
 
 type SaveOrderCommand struct {
 	ordersStore *OrdersStore
-    posts       *bot.Posts
-    users *bot.Users
+	posts       *bot.Posts
+	users       *bot.Users
 }
 
 func NewSaveOrderCommand(ordersStore *OrdersStore, posts *bot.Posts, users *bot.Users) *SaveOrderCommand {
@@ -46,11 +46,11 @@ func (p SaveOrderCommand) SaveOrder(message Message) error {
 }
 
 func (p SaveOrderCommand) AddOrderToStore(userId string, order *string) error {
-    newOrder, err := p.createOrder(userId, *order);
-    if err != nil {
-        return err
-    }
-    
+	newOrder, err := p.createOrder(userId, *order)
+	if err != nil {
+		return err
+	}
+
 	if err := p.ordersStore.Add(newOrder); err != nil {
 		return err
 	}
@@ -69,8 +69,8 @@ func (p SaveOrderCommand) RemoveOrderFromStore(userId string, order string) erro
 }
 
 func (p SaveOrderCommand) createOrder(userId string, order string) (Order, error) {
-    userName, err := p.users.Name(userId); 
-    if err != nil {
+	userName, err := p.users.Name(userId)
+	if err != nil {
 		return Order{}, err
 	}
 
