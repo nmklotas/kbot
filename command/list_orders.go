@@ -42,6 +42,11 @@ func (c ListOrdersCommand) CreateAllOrdersMessage() (*string, error) {
 		return nil, err
 	}
 
+	if len(orders) == 0 {
+		result := "No orders found for today"
+		return &result, nil
+	}
+
 	From(orders).
 		SelectT(func(o Order) string {
 			return fmt.Sprintf("User: %s, Order: %s", o.UserName, o.Value)

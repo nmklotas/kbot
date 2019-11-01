@@ -30,9 +30,9 @@ func main() {
 
 	posts, err := bot.NewPosts(apiClient, botChannel.Bot, botChannel.Channel)
 	panicOnError(err)
+	stopListeningForPostsOnInterupt(posts)
 
 	commands := createCommands(ordersStore, posts, users)
-	setupDisconnectOnOsInterrupt(posts)
 
 	posts.Subscribe(func(post *model.Post) {
 		if !command.IsBotCommand(post.Message) {
@@ -77,16 +77,18 @@ func createConnection(c config.Config) bot.Connection {
 func executeCommands(commands []command.Command, post *model.Post) {
 	From(commands).ForEachT(func(c command.Command) {
 		message := command.Message{Text: post.Message, UserId: post.UserId}
-		if c.CanHandle(message) {
-			err := c.Handle(message)
-			if err != nil {
-				fmt.Println(err)
-			}
+
+		if !c.CanHandle(message) {
+			return
+		}
+
+		if err := c.Handle(message); err != nil {
+			fmt.Println(err)
 		}
 	})
 }
 
-func setupDisconnectOnOsInterrupt(posts *bot.Posts) {
+func stopListeningForPostsOnInterupt(posts *bot.Posts) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
