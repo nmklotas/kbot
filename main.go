@@ -55,7 +55,8 @@ func main() {
 
 func createCommands(ordersStore *command.OrdersStore, posts *bot.Posts, users *bot.Users) []command.Command {
 	commands := []command.Command{
-		command.NewSaveOrderCommand(ordersStore, posts, users),
+		command.NewOrderCommand(ordersStore, posts, users),
+		command.NewForgetOrderCommand(ordersStore, posts, users),
 		command.NewListOrdersCommand(ordersStore, posts),
 	}
 	helpCommand := command.NewHelpCommand(posts, commands)
