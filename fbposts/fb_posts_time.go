@@ -13,9 +13,7 @@ func IsTimeToCheck(currentTime Time, checkTime Time, interval CheckInterval) boo
 }
 
 func StartTicking(callback func(Time), intervalMin int) {
-	go func() {
-		for now := range Tick(Duration(intervalMin) * Minute) {
-			callback(now)
-		}
-	}()
+	for now := range Tick(Duration(intervalMin) * Minute) {
+		callback(now)
+	}
 }

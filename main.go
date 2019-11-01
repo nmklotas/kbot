@@ -34,18 +34,22 @@ func main() {
 
 	commands := createCommands(ordersStore, posts, users)
 
-	posts.Subscribe(func(post *model.Post) {
-		if !command.IsBotCommand(post.Message) {
-			return
-		}
+	go func() {
+		posts.Subscribe(func(post *model.Post) {
+			if !command.IsBotCommand(post.Message) {
+				return
+			}
 
-		executeCommands(commands, post)
-	})
+			executeCommands(commands, post)
+		})
+	}()
 
-	fbposts.StartTicking(func(time time.Time) {
-		fmt.Printf("Post check %s", time)
-	}, config.PostCheckIntervalMin)
-
+	go func() {
+		fbposts.StartTicking(func(time time.Time) {
+			fmt.Printf("Post check %s", time)
+		}, config.PostCheckIntervalMin)
+	}()
+	
 	select {}
 }
 

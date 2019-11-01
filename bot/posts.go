@@ -46,11 +46,9 @@ func (p Posts) Create(message string, messageToReplyId string) error {
 }
 
 func (p Posts) Subscribe(callback PostCallback) {
-	go func() {
-		for event := range p.webSocketClient.EventChannel {
-			p.onMessage(event, callback)
-		}
-	}()
+	for event := range p.webSocketClient.EventChannel {
+		p.onMessage(event, callback)
+	}
 }
 
 func (p Posts) onMessage(event *model.WebSocketEvent, callback PostCallback) {
