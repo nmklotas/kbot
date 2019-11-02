@@ -27,7 +27,7 @@ func (c ListOrdersCommand) Handle(message Message) error {
 		return err
 	}
 
-	return c.posts.Create(*ordersMessage, "")
+	return c.posts.Create(*ordersMessage)
 }
 
 func (c ListOrdersCommand) Help() string {

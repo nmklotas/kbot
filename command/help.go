@@ -21,7 +21,7 @@ func (p HelpCommand) CanHandle(message Message) bool {
 }
 
 func (p HelpCommand) Handle(message Message) error {
-	return p.posts.Create(p.createHelpText(), "")
+	return p.posts.Create(p.createHelpText())
 }
 
 func (p HelpCommand) Help() string {

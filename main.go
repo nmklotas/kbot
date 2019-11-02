@@ -62,8 +62,14 @@ func main() {
 					return fb.ContainsWord(p, config.PostPhraseToSearch) && fb.IsPostedToday(p.CreatedTime)
 				}).(fb.FbPost)
 
-			posts.Create(fbPost.Text, "")
-			posts.Create(fbPost.Picture, "")
+			if err := posts.Create(fbPost.Text); err != nil {
+				fmt.Print(err)
+			}
+
+			if err := posts.Create(fbPost.Picture); err != nil {
+				fmt.Print(err)
+			}
+
 		}, config.PostCheckIntervalMin)
 	}()
 

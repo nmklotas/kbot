@@ -50,7 +50,7 @@ func (p OrderCommand) AddOrderToStore(userId string, order *string) error {
 	}
 
 	message := fmt.Sprintf("Order %s saved", strings.ToUpper(*order))
-	return p.posts.Create(message, "")
+	return p.posts.Create(message)
 }
 
 func (p OrderCommand) createOrder(userId string, order string) (Order, error) {

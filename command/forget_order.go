@@ -45,5 +45,5 @@ func (p ForgetOrderCommand) RemoveOrderFromStore(userId string, order string) er
 	}
 
 	message := fmt.Sprintf("Order %s removed", strings.ToUpper(order))
-	return p.posts.Create(message, "")
+	return p.posts.Create(message)
 }

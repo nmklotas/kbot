@@ -2,8 +2,9 @@ package bot
 
 import (
 	"fmt"
-	"github.com/mattermost/mattermost-server/model"
 	"strings"
+
+	"github.com/mattermost/mattermost-server/model"
 )
 
 type PostCallback func(*model.Post)
@@ -31,11 +32,11 @@ func (p Posts) Close() {
 	p.webSocketClient.Close()
 }
 
-func (p Posts) Create(message string, messageToReplyId string) error {
+func (p Posts) Create(message string) error {
 	post := &model.Post{}
 	post.ChannelId = p.channel.Id
 	post.Message = message
-	post.RootId = messageToReplyId
+	post.RootId = ""
 
 	_, resp := p.client.CreatePost(post)
 	if resp.Error != nil {
