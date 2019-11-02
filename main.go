@@ -6,6 +6,7 @@ import (
 	"kbot/command"
 	"kbot/config"
 	fb "kbot/fbposts"
+	"kbot/log"
 	"os"
 	"os/signal"
 	"time"
@@ -31,17 +32,22 @@ func main() {
 	panicOnError(err)
 	unsubscribeFromPostsOnInterupt(posts)
 
-	commands := createCommands(ordersStore, posts, users)
+	fbLunch := app.NewFbLunch(config, posts)
+	logger := log.CreateLogger()
+	botCommands := app.NewBotCommands(
+		createCommands(ordersStore, posts, users),
+		logger)
 
 	go func() {
 		posts.Subscribe(func(post *model.Post) {
-			app.ExecuteCommands(commands, post)
+			botCommands.Execute(post)
 		})
 	}()
 
 	go func() {
 		fb.StartTicking(func(time time.Time) {
-			app.PostLunchOffers(time, config, posts)
+			logger.Info("Tick")
+			fbLunch.PostOffers(time)
 		}, config.PostCheckIntervalMin)
 	}()
 

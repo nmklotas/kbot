@@ -21,7 +21,7 @@ func ContainsWord(post FbPost, word string) bool {
 }
 
 func FindPosts(pageId int, accessToken string) (*[]FbPost, error) {
-	res, err := fb.Get("/"+strconv.Itoa(pageId)+"/posts?fields=message,created_time", fb.Params{
+	res, err := fb.Get("/"+strconv.Itoa(pageId)+"/posts?fields=message,created_time,full_picture", fb.Params{
 		"access_token": accessToken,
 	})
 
@@ -47,14 +47,15 @@ func createFbPosts(res fb.Result) (*[]FbPost, error) {
 	posts := []FbPost{}
 	From(items).
 		SelectT(func(r fb.Result) FbPost {
-			createdTime, err := time.Parse(time.RFC3339, r["created_time"].(string))
+			time, err := ParseToLocalTime(r["created_time"].(string))
 			if err != nil {
 				timeParseErr = err
 			}
+
 			return FbPost{
-				Text:        r["message"].(string),
-				CreatedTime: createdTime,
-				Picture:     r["full_picture"].(string),
+				Text:        toString(r, "message"),
+				CreatedTime: time,
+				Picture:     toString(r, "full_picture"),
 			}
 		}).
 		ToSlice(&posts)
@@ -64,4 +65,12 @@ func createFbPosts(res fb.Result) (*[]FbPost, error) {
 	}
 
 	return &posts, nil
+}
+
+func toString(result fb.Result, key string) string {
+	if v, ok := result[key].(string); ok {
+		return v
+	}
+
+	return ""
 }

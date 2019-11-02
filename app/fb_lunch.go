@@ -1,41 +1,63 @@
 package app
 
 import (
-	"fmt"
+	"errors"
 	"kbot/bot"
-	"kbot/config"
+	c "kbot/config"
 	fb "kbot/fbposts"
 	"time"
 
 	. "github.com/ahmetb/go-linq/v3"
 )
 
-func PostLunchOffers(time time.Time, config config.Config, posts *bot.Posts) {
+type FbLunch struct {
+	config c.Config
+	posts  *bot.Posts
+}
+
+func NewFbLunch(config c.Config, posts *bot.Posts) *FbLunch {
+	return &FbLunch{config, posts}
+}
+
+func (f FbLunch) PostOffers(time time.Time) error {
 	interval := fb.CheckInterval{
-		Min: config.PostCheckIntervalBeforeMin,
-		Max: config.PostCheckIntervalAfterMax,
+		Min: f.config.PostCheckIntervalBeforeMin,
+		Max: f.config.PostCheckIntervalAfterMax,
 	}
 
-	if !fb.IsTimeToCheck(time, config.PostTime, interval) {
-		return
+	if !fb.IsTimeToCheck(time, f.config.PostTime, interval) {
+		return nil
 	}
 
-	fmt.Printf("Post check %s", time)
-	fbPosts, err := fb.FindPosts(config.FbPageId, config.FbAccessToken)
+	fbPosts, err := fb.FindPosts(f.config.FbPageId, f.config.FbAccessToken)
 	if err != nil {
-		fmt.Print(err)
+		return err
 	}
 
-	fbPost := From(fbPosts).
+	fbPost, ok := From(*fbPosts).
 		FirstWithT(func(p fb.FbPost) bool {
-			return fb.ContainsWord(p, config.PostPhraseToSearch) && fb.IsPostedToday(p.CreatedTime)
+			return fb.ContainsWord(p, f.config.PostPhraseToSearch) && fb.IsPostedToday(p.CreatedTime)
 		}).(fb.FbPost)
 
-	if err := posts.Create(fbPost.Text); err != nil {
-		fmt.Print(err)
+	if !ok {
+		return errors.New("Fb post not found")
 	}
 
-	if err := posts.Create(fbPost.Picture); err != nil {
-		fmt.Print(err)
+	return f.CreatePost(fbPost)
+}
+
+func (f FbLunch) CreatePost(post fb.FbPost) error {
+	if post.Text != "" {
+		if err := f.posts.Create(post.Text); err != nil {
+			return err
+		}
 	}
+
+	if post.Picture != "" {
+		if err := f.posts.Create(post.Picture); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

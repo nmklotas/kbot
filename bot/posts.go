@@ -62,7 +62,7 @@ func (p Posts) onMessage(event *model.WebSocketEvent, callback PostCallback) {
 		return
 	}
 
-	if post.Id == p.user.Id {
+	if post.UserId == p.user.Id {
 		return
 	}
 

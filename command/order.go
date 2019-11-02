@@ -19,7 +19,7 @@ func NewOrderCommand(ordersStore *OrdersStore, posts *bot.Posts, users *bot.User
 
 func (p OrderCommand) CanHandle(message Message) bool {
 	_, addErr := ParseOrderToAdd(message.Text)
-	return addErr != nil
+	return addErr == nil
 }
 
 func (p OrderCommand) Handle(message Message) error {

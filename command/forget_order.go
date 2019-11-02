@@ -19,7 +19,7 @@ func NewForgetOrderCommand(ordersStore *OrdersStore, posts *bot.Posts, users *bo
 
 func (p ForgetOrderCommand) CanHandle(message Message) bool {
 	_, removeErr := ParseOrderToRemove(message.Text)
-	return removeErr != nil
+	return removeErr == nil
 }
 
 func (p ForgetOrderCommand) Handle(message Message) error {
