@@ -1,6 +1,6 @@
 {
     "git.ignoreLimitWarning": true,
-    "go.useLanguageServer": false,
+    "go.useLanguageServer": true,
     "go.formatTool": "gofmt",
     "[go]": {
         "editor.formatOnSave": false,

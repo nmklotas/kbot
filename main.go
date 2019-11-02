@@ -5,7 +5,7 @@ import (
 	"kbot/bot"
 	"kbot/command"
 	"kbot/config"
-	"kbot/fbposts"
+	fb "kbot/fbposts"
 	"os"
 	"os/signal"
 	"time"
@@ -36,20 +36,37 @@ func main() {
 
 	go func() {
 		posts.Subscribe(func(post *model.Post) {
-			if !command.IsBotCommand(post.Message) {
-				return
-			}
-
 			executeCommands(commands, post)
 		})
 	}()
 
 	go func() {
-		fbposts.StartTicking(func(time time.Time) {
+		fb.StartTicking(func(time time.Time) {
+			interval := fb.CheckInterval{
+				Min: config.PostCheckIntervalBeforeMin,
+				Max: config.PostCheckIntervalAfterMax,
+			}
+
+			if !fb.IsTimeToCheck(time, config.PostTime, interval) {
+				return
+			}
+
 			fmt.Printf("Post check %s", time)
+			fbPosts, err := fb.FindPosts(config.FbPageId, config.FbAccessToken)
+			if err != nil {
+				fmt.Print(err)
+			}
+
+			fbPost := From(fbPosts).
+				FirstWithT(func(p fb.FbPost) bool {
+					return fb.ContainsWord(p, config.PostPhraseToSearch) && fb.IsPostedToday(p.CreatedTime)
+				}).(fb.FbPost)
+
+			posts.Create(fbPost.Text, "")
+			posts.Create(fbPost.Picture, "")
 		}, config.PostCheckIntervalMin)
 	}()
-	
+
 	select {}
 }
 
@@ -80,9 +97,12 @@ func createConnection(c config.Config) bot.Connection {
 }
 
 func executeCommands(commands []command.Command, post *model.Post) {
+	if !command.IsBotCommand(post.Message) {
+		return
+	}
+
 	From(commands).ForEachT(func(c command.Command) {
 		message := command.Message{Text: post.Message, UserId: post.UserId}
-
 		if !c.CanHandle(message) {
 			return
 		}

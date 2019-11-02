@@ -1,14 +1,24 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"time"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
-	ServerUrl            string
-	Channel              string
-	Email                string
-	Password             string
-	Team                 string
-	PostCheckIntervalMin int
+	ServerUrl                  string
+	Channel                    string
+	Email                      string
+	Password                   string
+	Team                       string
+	PostPhraseToSearch         string
+	PostTime                   time.Time
+	PostCheckIntervalMin       int
+	PostCheckIntervalBeforeMin int
+	PostCheckIntervalAfterMax  int
+	FbAccessToken              string
+	FbPageId                   int
 }
 
 func ReadConfig(configName string) (Config, error) {
@@ -21,11 +31,17 @@ func ReadConfig(configName string) (Config, error) {
 	}
 
 	return Config{
-		ServerUrl:            viper.GetString("ServerUrl"),
-		Channel:              viper.GetString("Channel"),
-		Email:                viper.GetString("Email"),
-		Password:             viper.GetString("Password"),
-		Team:                 viper.GetString("Team"),
-		PostCheckIntervalMin: viper.GetInt("PostCheckIntervalMin"),
+		ServerUrl:                  viper.GetString("ServerUrl"),
+		Channel:                    viper.GetString("Channel"),
+		Email:                      viper.GetString("Email"),
+		Password:                   viper.GetString("Password"),
+		Team:                       viper.GetString("Team"),
+		PostPhraseToSearch:         viper.GetString("PostPhraseToSearch"),
+		PostTime:                   viper.GetTime("PostTime"),
+		PostCheckIntervalMin:       viper.GetInt("PostCheckIntervalMin"),
+		PostCheckIntervalBeforeMin: viper.GetInt("PostCheckIntervalBeforeMin"),
+		PostCheckIntervalAfterMax:  viper.GetInt("PostCheckIntervalAfterMax"),
+		FbAccessToken:              viper.GetString("FbAccessToken"),
+		FbPageId:                   viper.GetInt("FbPageId"),
 	}, nil
 }
