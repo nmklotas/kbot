@@ -16,7 +16,7 @@ type Posts struct {
 	channel         *model.Channel
 }
 
-func NewPosts(client *model.Client4, user *model.User, channel *model.Channel) (*Posts, error) {
+func SubscribeToPosts(client *model.Client4, user *model.User, channel *model.Channel) (*Posts, error) {
 	webSocketClient, err := model.NewWebSocketClient4(createWebSocketServerUrl(client), client.AuthToken)
 	if err != nil {
 		return nil, err

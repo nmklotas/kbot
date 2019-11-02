@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"kbot/app"
 	"kbot/bot"
 	"kbot/command"
 	"kbot/config"
@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"time"
 
-	. "github.com/ahmetb/go-linq/v3"
 	"github.com/mattermost/mattermost-server/model"
 )
 
@@ -21,55 +20,28 @@ func main() {
 	matterMostBot := bot.NewMatterMostBot(apiClient, connection)
 	users := bot.NewUsers(apiClient)
 
-	ordersStore, err := command.NewOrdersStore()
+	ordersStore, err := command.OpenOrdersStore()
 	panicOnError(err)
 	defer ordersStore.Close()
 
 	botChannel, err := matterMostBot.JoinChannel()
 	panicOnError(err)
 
-	posts, err := bot.NewPosts(apiClient, botChannel.Bot, botChannel.Channel)
+	posts, err := bot.SubscribeToPosts(apiClient, botChannel.Bot, botChannel.Channel)
 	panicOnError(err)
-	stopListeningForPostsOnInterupt(posts)
+	unsubscribeFromPostsOnInterupt(posts)
 
 	commands := createCommands(ordersStore, posts, users)
 
 	go func() {
 		posts.Subscribe(func(post *model.Post) {
-			executeCommands(commands, post)
+			app.ExecuteCommands(commands, post)
 		})
 	}()
 
 	go func() {
 		fb.StartTicking(func(time time.Time) {
-			interval := fb.CheckInterval{
-				Min: config.PostCheckIntervalBeforeMin,
-				Max: config.PostCheckIntervalAfterMax,
-			}
-
-			if !fb.IsTimeToCheck(time, config.PostTime, interval) {
-				return
-			}
-
-			fmt.Printf("Post check %s", time)
-			fbPosts, err := fb.FindPosts(config.FbPageId, config.FbAccessToken)
-			if err != nil {
-				fmt.Print(err)
-			}
-
-			fbPost := From(fbPosts).
-				FirstWithT(func(p fb.FbPost) bool {
-					return fb.ContainsWord(p, config.PostPhraseToSearch) && fb.IsPostedToday(p.CreatedTime)
-				}).(fb.FbPost)
-
-			if err := posts.Create(fbPost.Text); err != nil {
-				fmt.Print(err)
-			}
-
-			if err := posts.Create(fbPost.Picture); err != nil {
-				fmt.Print(err)
-			}
-
+			app.PostLunchOffers(time, config, posts)
 		}, config.PostCheckIntervalMin)
 	}()
 
@@ -102,24 +74,7 @@ func createConnection(c config.Config) bot.Connection {
 	}
 }
 
-func executeCommands(commands []command.Command, post *model.Post) {
-	if !command.IsBotCommand(post.Message) {
-		return
-	}
-
-	From(commands).ForEachT(func(c command.Command) {
-		message := command.Message{Text: post.Message, UserId: post.UserId}
-		if !c.CanHandle(message) {
-			return
-		}
-
-		if err := c.Handle(message); err != nil {
-			fmt.Println(err)
-		}
-	})
-}
-
-func stopListeningForPostsOnInterupt(posts *bot.Posts) {
+func unsubscribeFromPostsOnInterupt(posts *bot.Posts) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
