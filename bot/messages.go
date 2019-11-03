@@ -7,32 +7,32 @@ import (
 	"github.com/mattermost/mattermost-server/model"
 )
 
-type PostCallback func(*model.Post)
+type MessageCallback func(*model.Post)
 
-type Posts struct {
-	client          *model.Client4
-	webSocketClient *model.WebSocketClient
-	user            *model.User
-	channel         *model.Channel
+type Messages struct {
+	client   *model.Client4
+	wsClient *model.WebSocketClient
+	user     *model.User
+	channel  *model.Channel
 }
 
-func SubscribeToPosts(client *model.Client4, user *model.User, channel *model.Channel) (*Posts, error) {
-	webSocketClient, err := model.NewWebSocketClient4(createWebSocketServerUrl(client), client.AuthToken)
+func ListenMessages(client *model.Client4, user *model.User, channel *model.Channel) (*Messages, error) {
+	wsClient, err := model.NewWebSocketClient4(createWebSocketServerUrl(client), client.AuthToken)
 	if err != nil {
 		return nil, err
 	}
 
-	webSocketClient.Listen()
+	wsClient.Listen()
 
-	posts := Posts{client, webSocketClient, user, channel}
+	posts := Messages{client, wsClient, user, channel}
 	return &posts, nil
 }
 
-func (p Posts) Close() {
-	p.webSocketClient.Close()
+func (p Messages) Close() {
+	p.wsClient.Close()
 }
 
-func (p Posts) Create(message string) error {
+func (p Messages) Send(message string) error {
 	post := &model.Post{
 		ChannelId: p.channel.Id,
 		Message:   message,
@@ -45,13 +45,13 @@ func (p Posts) Create(message string) error {
 	return nil
 }
 
-func (p Posts) Subscribe(callback PostCallback) {
-	for event := range p.webSocketClient.EventChannel {
+func (p Messages) Subscribe(callback MessageCallback) {
+	for event := range p.wsClient.EventChannel {
 		p.onMessage(event, callback)
 	}
 }
 
-func (p Posts) onMessage(event *model.WebSocketEvent, callback PostCallback) {
+func (p Messages) onMessage(event *model.WebSocketEvent, callback MessageCallback) {
 	if event.Event != model.WEBSOCKET_EVENT_POSTED {
 		return
 	}

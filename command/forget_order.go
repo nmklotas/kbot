@@ -9,12 +9,12 @@ import (
 
 type ForgetOrderCommand struct {
 	ordersStore *OrdersStore
-	posts       *bot.Posts
+	messages    *bot.Messages
 	users       *bot.Users
 }
 
-func NewForgetOrderCommand(ordersStore *OrdersStore, posts *bot.Posts, users *bot.Users) *ForgetOrderCommand {
-	return &ForgetOrderCommand{ordersStore, posts, users}
+func NewForgetOrderCommand(ordersStore *OrdersStore, messages *bot.Messages, users *bot.Users) *ForgetOrderCommand {
+	return &ForgetOrderCommand{ordersStore, messages, users}
 }
 
 func (p ForgetOrderCommand) CanHandle(message Message) bool {
@@ -45,5 +45,5 @@ func (p ForgetOrderCommand) RemoveOrderFromStore(userId string, order string) er
 	}
 
 	message := fmt.Sprintf("Order %s removed", strings.ToUpper(order))
-	return p.posts.Create(message)
+	return p.messages.Send(message)
 }

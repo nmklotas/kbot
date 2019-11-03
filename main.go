@@ -27,7 +27,7 @@ func main() {
 	botChannel, err := bot.NewChannel(apiClient, connection).Join()
 	panicOnError(err)
 
-	posts, err := bot.SubscribeToPosts(apiClient, botChannel.Bot, botChannel.Channel)
+	posts, err := bot.ListenMessages(apiClient, botChannel.Bot, botChannel.Channel)
 	panicOnError(err)
 	unsubscribeFromPostsOnInterupt(posts)
 
@@ -53,13 +53,13 @@ func main() {
 	select {}
 }
 
-func createCommands(ordersStore *command.OrdersStore, posts *bot.Posts, users *bot.Users) []command.Command {
+func createCommands(ordersStore *command.OrdersStore, messages *bot.Messages, users *bot.Users) []command.Command {
 	commands := []command.Command{
-		command.NewOrderCommand(ordersStore, posts, users),
-		command.NewForgetOrderCommand(ordersStore, posts, users),
-		command.NewListOrdersCommand(ordersStore, posts),
+		command.NewOrderCommand(ordersStore, messages, users),
+		command.NewForgetOrderCommand(ordersStore, messages, users),
+		command.NewListOrdersCommand(ordersStore, messages),
 	}
-	helpCommand := command.NewHelpCommand(posts, commands)
+	helpCommand := command.NewHelpCommand(messages, commands)
 	return append(commands, helpCommand)
 }
 
@@ -79,12 +79,12 @@ func createConnection(c config.Config) bot.Connection {
 	}
 }
 
-func unsubscribeFromPostsOnInterupt(posts *bot.Posts) {
+func unsubscribeFromPostsOnInterupt(messages *bot.Messages) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for range c {
-			posts.Close()
+			messages.Close()
 			os.Exit(0)
 		}
 	}()

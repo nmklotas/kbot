@@ -9,12 +9,12 @@ import (
 
 type OrderCommand struct {
 	ordersStore *OrdersStore
-	posts       *bot.Posts
+	messages    *bot.Messages
 	users       *bot.Users
 }
 
-func NewOrderCommand(ordersStore *OrdersStore, posts *bot.Posts, users *bot.Users) *OrderCommand {
-	return &OrderCommand{ordersStore, posts, users}
+func NewOrderCommand(ordersStore *OrdersStore, messages *bot.Messages, users *bot.Users) *OrderCommand {
+	return &OrderCommand{ordersStore, messages, users}
 }
 
 func (p OrderCommand) CanHandle(message Message) bool {
@@ -50,7 +50,7 @@ func (p OrderCommand) AddOrderToStore(userId string, order *string) error {
 	}
 
 	message := fmt.Sprintf("Order %s saved", strings.ToUpper(*order))
-	return p.posts.Create(message)
+	return p.messages.Send(message)
 }
 
 func (p OrderCommand) createOrder(userId string, order string) (Order, error) {

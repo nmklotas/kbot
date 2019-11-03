@@ -8,12 +8,12 @@ import (
 )
 
 type HelpCommand struct {
-	posts    *bot.Posts
+	messages *bot.Messages
 	commands []Command
 }
 
-func NewHelpCommand(posts *bot.Posts, commands []Command) *HelpCommand {
-	return &HelpCommand{posts, commands}
+func NewHelpCommand(messages *bot.Messages, commands []Command) *HelpCommand {
+	return &HelpCommand{messages, commands}
 }
 
 func (p HelpCommand) CanHandle(message Message) bool {
@@ -21,7 +21,7 @@ func (p HelpCommand) CanHandle(message Message) bool {
 }
 
 func (p HelpCommand) Handle(message Message) error {
-	return p.posts.Create(p.createHelpText())
+	return p.messages.Send(p.createHelpText())
 }
 
 func (p HelpCommand) Help() string {

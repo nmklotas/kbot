@@ -10,11 +10,11 @@ import (
 
 type ListOrdersCommand struct {
 	ordersStore *OrdersStore
-	posts       *bot.Posts
+	messages    *bot.Messages
 }
 
-func NewListOrdersCommand(ordersStore *OrdersStore, posts *bot.Posts) *ListOrdersCommand {
-	return &ListOrdersCommand{ordersStore, posts}
+func NewListOrdersCommand(ordersStore *OrdersStore, messages *bot.Messages) *ListOrdersCommand {
+	return &ListOrdersCommand{ordersStore, messages}
 }
 
 func (c ListOrdersCommand) CanHandle(message Message) bool {
@@ -27,7 +27,7 @@ func (c ListOrdersCommand) Handle(message Message) error {
 		return err
 	}
 
-	return c.posts.Create(*ordersMessage)
+	return c.messages.Send(*ordersMessage)
 }
 
 func (c ListOrdersCommand) Help() string {

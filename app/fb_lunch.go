@@ -11,12 +11,12 @@ import (
 )
 
 type FbLunch struct {
-	config c.Config
-	posts  *bot.Posts
+	config   c.Config
+	messages *bot.Messages
 }
 
-func NewFbLunch(config c.Config, posts *bot.Posts) *FbLunch {
-	return &FbLunch{config, posts}
+func NewFbLunch(config c.Config, messages *bot.Messages) *FbLunch {
+	return &FbLunch{config, messages}
 }
 
 func (f FbLunch) PostOffers(time time.Time) error {
@@ -48,13 +48,13 @@ func (f FbLunch) PostOffers(time time.Time) error {
 
 func (f FbLunch) CreatePost(post fb.FbPost) error {
 	if post.Text != "" {
-		if err := f.posts.Create(post.Text); err != nil {
+		if err := f.messages.Send(post.Text); err != nil {
 			return err
 		}
 	}
 
 	if post.Picture != "" {
-		if err := f.posts.Create(post.Picture); err != nil {
+		if err := f.messages.Send(post.Picture); err != nil {
 			return err
 		}
 	}
