@@ -33,13 +33,12 @@ func (p Posts) Close() {
 }
 
 func (p Posts) Create(message string) error {
-	post := &model.Post{}
-	post.ChannelId = p.channel.Id
-	post.Message = message
-	post.RootId = ""
+	post := &model.Post{
+		ChannelId: p.channel.Id,
+		Message:   message,
+	}
 
-	_, resp := p.client.CreatePost(post)
-	if resp.Error != nil {
+	if _, resp := p.client.CreatePost(post); resp.Error != nil {
 		return resp.Error
 	}
 
