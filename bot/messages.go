@@ -24,8 +24,8 @@ func ListenMessages(client *model.Client4, user *model.User, channel *model.Chan
 
 	wsClient.Listen()
 
-	posts := Messages{client, wsClient, user, channel}
-	return &posts, nil
+	messages := Messages{client, wsClient, user, channel}
+	return &messages, nil
 }
 
 func (p Messages) Close() {

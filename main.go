@@ -27,26 +27,28 @@ func main() {
 	botChannel, err := bot.NewChannel(apiClient, connection).Join()
 	panicOnError(err)
 
-	posts, err := bot.ListenMessages(apiClient, botChannel.Bot, botChannel.Channel)
+	messages, err := bot.ListenMessages(apiClient, botChannel.Bot, botChannel.Channel)
 	panicOnError(err)
-	unsubscribeFromPostsOnInterupt(posts)
+	unsubscribeFromPostsOnInterupt(messages)
 
-	fbLunch := app.NewFbLunch(config, posts)
+	fbLunch := app.NewFbLunch(config, messages)
 	logger := log.NewLogger()
 	botCommands := app.NewBotCommands(
-		createCommands(ordersStore, posts, users),
+		createCommands(ordersStore, messages, users),
 		logger)
 
 	go func() {
-		posts.Subscribe(func(post *model.Post) {
-			botCommands.Execute(post)
+		messages.Subscribe(func(m *model.Post) {
+			botCommands.Execute(m)
 		})
 	}()
 
 	go func() {
-		fb.StartTicking(func(time time.Time) {
+		fb.StartTicking(func(t time.Time) {
 			logger.Info("Tick")
-			fbLunch.PostOffers(time)
+			if err := fbLunch.PostOffers(t); err == nil {
+				messages.Send("Orders available. Type 'kbot order {letter}' to order!")
+			}
 		}, config.PostCheckIntervalMin)
 	}()
 

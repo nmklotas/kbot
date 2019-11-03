@@ -43,10 +43,10 @@ func (f FbLunch) PostOffers(time time.Time) error {
 		return errors.New("Fb post not found")
 	}
 
-	return f.CreatePost(fbPost)
+	return f.SendMessage(fbPost)
 }
 
-func (f FbLunch) CreatePost(post fb.FbPost) error {
+func (f FbLunch) SendMessage(post fb.FbPost) error {
 	if post.Text != "" {
 		if err := f.messages.Send(post.Text); err != nil {
 			return err

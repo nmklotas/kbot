@@ -18,13 +18,13 @@ func NewBotCommands(c []command.Command, l *logrus.Logger) *BotCommands {
 	return &BotCommands{c, l}
 }
 
-func (b BotCommands) Execute(post *model.Post) {
-	if !b.isBotCommand(post) {
+func (b BotCommands) Execute(m *model.Post) {
+	if !b.isBotCommand(m) {
 		return
 	}
 
 	From(b.commands).ForEachT(func(c command.Command) {
-		message := command.Message{Text: post.Message, UserId: post.UserId}
+		message := command.Message{Text: m.Message, UserId: m.UserId}
 		if !c.CanHandle(message) {
 			return
 		}
@@ -35,6 +35,6 @@ func (b BotCommands) Execute(post *model.Post) {
 	})
 }
 
-func (b BotCommands) isBotCommand(p *model.Post) bool {
-	return strings.HasPrefix(p.Message, "kbot")
+func (b BotCommands) isBotCommand(m *model.Post) bool {
+	return strings.HasPrefix(m.Message, "kbot")
 }
