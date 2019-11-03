@@ -3,7 +3,7 @@ package command
 import "testing"
 
 func TestCanAdd(t *testing.T) {
-	db, err := OpenOrdersStore()
+	db, err := OpenOrdersRepository()
 	if err != nil {
 		t.Errorf("store not created")
 	}
@@ -20,7 +20,7 @@ func TestCanAdd(t *testing.T) {
 }
 
 func TestCanRemove(t *testing.T) {
-	db, err := OpenOrdersStore()
+	db, err := OpenOrdersRepository()
 	if err != nil {
 		t.Errorf("store not created")
 	}

@@ -16,7 +16,7 @@ type Order struct {
 	Value    string
 }
 
-func OpenOrdersStore() (*OrdersStore, error) {
+func OpenOrdersRepository() (*OrdersStore, error) {
 	db, err := gorm.Open("sqlite3", "orders.db")
 	if err != nil {
 		return nil, err

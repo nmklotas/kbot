@@ -20,9 +20,9 @@ func main() {
 	apiClient := model.NewAPIv4Client(connection.ServerUrl)
 	users := bot.NewUsers(apiClient)
 
-	ordersStore, err := command.OpenOrdersStore()
+	ordersRepository, err := command.OpenOrdersRepository()
 	panicOnError(err)
-	defer ordersStore.Close()
+	defer ordersRepository.Close()
 
 	botChannel, err := bot.NewChannel(apiClient, connection).Join()
 	panicOnError(err)
@@ -34,7 +34,7 @@ func main() {
 	fbLunch := app.NewFbLunch(config, messages)
 	logger := log.NewLogger()
 	botCommands := app.NewBotCommands(
-		createCommands(ordersStore, messages, users),
+		createCommands(ordersRepository, messages, users),
 		logger)
 
 	go func() {
