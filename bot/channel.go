@@ -12,7 +12,7 @@ type Connection struct {
 	Channel   string
 }
 
-type MatterMostBot struct {
+type Channel struct {
 	client     *model.Client4
 	connection Connection
 }
@@ -22,11 +22,11 @@ type BotChannel struct {
 	Channel *model.Channel
 }
 
-func NewMatterMostBot(client *model.Client4, c Connection) *MatterMostBot {
-	return &MatterMostBot{client, c}
+func NewChannel(client *model.Client4, c Connection) *Channel {
+	return &Channel{client, c}
 }
 
-func (b MatterMostBot) JoinChannel() (*BotChannel, error) {
+func (b Channel) Join() (*BotChannel, error) {
 	botUser, resp := b.client.Login(b.connection.Email, b.connection.Password)
 	if resp.Error != nil {
 		return nil, resp.Error

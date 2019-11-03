@@ -18,14 +18,13 @@ func main() {
 	config := readConfig()
 	connection := createConnection(config)
 	apiClient := model.NewAPIv4Client(connection.ServerUrl)
-	matterMostBot := bot.NewMatterMostBot(apiClient, connection)
 	users := bot.NewUsers(apiClient)
 
 	ordersStore, err := command.OpenOrdersStore()
 	panicOnError(err)
 	defer ordersStore.Close()
 
-	botChannel, err := matterMostBot.JoinChannel()
+	botChannel, err := bot.NewChannel(apiClient, connection).Join()
 	panicOnError(err)
 
 	posts, err := bot.SubscribeToPosts(apiClient, botChannel.Bot, botChannel.Channel)
@@ -33,7 +32,7 @@ func main() {
 	unsubscribeFromPostsOnInterupt(posts)
 
 	fbLunch := app.NewFbLunch(config, posts)
-	logger := log.CreateLogger()
+	logger := log.NewLogger()
 	botCommands := app.NewBotCommands(
 		createCommands(ordersStore, posts, users),
 		logger)
