@@ -1,8 +1,6 @@
 package app
 
 import (
-	"errors"
-
 	. "github.com/ahmetb/go-linq/v3"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -32,18 +30,13 @@ func (o LunchRepository) Save(lunch Lunch) error {
 	return o.db.Create(&lunch).Error
 }
 
-func (o LunchRepository) Find(predicate LunchPredicate) (*Lunch, error) {
+func (o LunchRepository) Any(predicate LunchPredicate) bool {
 	var lunches []Lunch
-
 	if result := o.db.Find(&lunches); result.Error != nil {
-		return nil, result.Error
+		return false
 	}
 
-	if result, ok := From(lunches).FirstWithT(predicate).(Lunch); ok {
-		return &result, nil
-	}
-
-	return nil, errors.New("Lunch not found")
+	return From(lunches).AnyWithT(predicate)
 }
 
 func (o LunchRepository) Close() error {

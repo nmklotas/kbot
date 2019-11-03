@@ -31,7 +31,11 @@ func main() {
 	panicOnError(err)
 	unsubscribeFromPostsOnInterupt(messages)
 
-	fbLunch := app.NewFbLunch(config, messages)
+	lunchRepository, err := app.OpenLunchRepository()
+	panicOnError(err)
+	defer lunchRepository.Close()
+
+	fbLunch := app.NewFbLunch(config, messages, lunchRepository)
 	logger := log.NewLogger()
 	botCommands := app.NewBotCommands(
 		createCommands(ordersRepository, messages, users),
