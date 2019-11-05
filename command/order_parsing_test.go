@@ -1,32 +1,25 @@
 package command
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestParsesListOrders(t *testing.T) {
+	assert := assert.New(t)
 	result := ParseListOrders("kbot list")
-	if !result {
-		t.Errorf("kbot list not parsed")
-	}
+	assert.True(result, "kbot list not parsed")
 }
 
 func TestParsesOrderAdd(t *testing.T) {
-	result, err := ParseOrderToAdd("kbot order A")
-	if err != nil {
-		t.Errorf("kbot order A parse error")
-	}
-
-	if *result != "A" {
-		t.Errorf("kbot order A not parsed")
-	}
+	assert := assert.New(t)
+	result, _ := ParseOrderToAdd("kbot order A")
+	assert.Equal("A", *result, "kbot list not parsed")
 }
 
 func TestParsesOrderRemove(t *testing.T) {
-	result, err := ParseOrderToRemove("kbot forget A")
-	if err != nil {
-		t.Errorf("kbot forget A parse error")
-	}
-
-	if *result != "A" {
-		t.Errorf("kbot forget A not parsed")
-	}
+	assert := assert.New(t)
+	result, _ := ParseOrderToRemove("kbot forget A")
+	assert.Equal("A", *result, "kbot list not parsed")
 }

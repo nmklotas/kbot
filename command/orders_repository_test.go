@@ -1,8 +1,13 @@
 package command
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestCanAdd(t *testing.T) {
+	assert := assert.New(t)
 	db, err := OpenOrdersRepository()
 	if err != nil {
 		t.Errorf("store not created")
@@ -13,13 +18,12 @@ func TestCanAdd(t *testing.T) {
 		t.Errorf("order not added")
 	}
 
-	orders, err := db.List()
-	if err != nil || len(orders) == 0 {
-		t.Errorf("order not added")
-	}
+	orders, _ := db.List()
+	assert.NotEmpty(orders)
 }
 
 func TestCanRemove(t *testing.T) {
+	assert := assert.New(t)
 	db, err := OpenOrdersRepository()
 	if err != nil {
 		t.Errorf("store not created")
@@ -35,8 +39,6 @@ func TestCanRemove(t *testing.T) {
 		t.Errorf("order not removed")
 	}
 
-	orders, err := db.List()
-	if err != nil || len(orders) != 0 {
-		t.Errorf("order not removed")
-	}
+	orders, _ := db.List()
+	assert.Empty(orders)
 }

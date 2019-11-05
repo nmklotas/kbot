@@ -9,9 +9,14 @@ import (
 func TestCanFindWithTruePredicate(t *testing.T) {
 	assert := assert.New(t)
 	db, err := OpenLunchRepository()
-	assert.NoError(err)
+	if err != nil {
+		t.Errorf("store not created")
+	}
+
 	err = db.Save(Lunch{})
-	assert.NoError(err)
+	if err != nil {
+		t.Errorf("store not created")
+	}
 
 	result := db.Any(func(l Lunch) bool {
 		return true
@@ -21,6 +26,7 @@ func TestCanFindWithTruePredicate(t *testing.T) {
 }
 
 func TestCantFindWithFalsePredicate(t *testing.T) {
+	assert := assert.New(t)
 	db, err := OpenLunchRepository()
 	if err != nil {
 		t.Errorf("store not created")
@@ -35,7 +41,5 @@ func TestCantFindWithFalsePredicate(t *testing.T) {
 		return false
 	})
 
-	if result {
-		t.Errorf("order should not be found")
-	}
+	assert.False(result, "order should not be found")
 }
