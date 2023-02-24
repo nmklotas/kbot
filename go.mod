@@ -13,6 +13,5 @@ require (
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.4.0
 	go.uber.org/zap v1.10.1-0.20190926184545-d8445f34b4ae // indirect
-	golang.org/x/net v0.0.0-20191011234655-491137f69257 // indirect
-	golang.org/x/text v0.3.3-0.20190829152558-3d0f7978add9 // indirect
+	golang.org/x/net v0.7.0 // indirect
 )
